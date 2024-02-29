@@ -113,12 +113,17 @@ for j = 2:n
     # Actual Constraints
         rx[j] ≥ 0
         μ1[j]*(1 - (z[j]-z0[j]) + (z[j]-z0[j])^2/2) ≤ σ[j]
-        σ[j] ≤ μ2[j]*(1 - (z[i]-z0[i]))
+        σ[j] ≤ μ2[j]*(1 - (z[j]-z0[j]))
         z0[j] ≤ z[j]
         z[j] ≤ log(m_wet - α*rho1*Δt*i)
+        0 ≤ σ[i]^2 - (ux[i]^2 + uy[i]^2 + uz[i]^2)
+        rho1^2 ≤ (ux[i]^2 + uy[i]^2 + uz[i]^2) * exp(z[i])^2
+        (ux[i]^2 + uy[i]^2 + uz[i]^2) * exp(z[i])^2 ≤ rho2^2
+        (ry[i]^2 + rz[i]^2) ≤ (rx[i]*tan(minGlide))^2
     end)
 end
 
+#=
 for k = 1:n
     @constraints(model, begin
     0 ≤ σ[k]^2 - (ux[k]^2 + uy[k]^2 + uz[k]^2)
@@ -127,11 +132,12 @@ for k = 1:n
     (ry[k]^2 + rz[k]^2) ≤ (rx[k]*tan(minGlide))^2
     end)
 end
+=#
 
 # PROBLEM: IPOPT DOES NOT LIKE L2-NORMS
 # SOLUTION: SQUARE BOTH SIDES OF THE CONSTRAINTS
 
-# PROBLEM: Dynamics (@ j = 2) do not make physical sense
+# PROBLEM: Dynamics (@ j = 2) do not make physical sense - need to check iteration, should not separate into 2 blocks?
 # SOLUTION: ???
 
 # Set Objective: Minimize fuel usage/Maximise final mass
@@ -172,3 +178,5 @@ Plots.plot(x1, x2, x3,
         v1, v2, v3, 
         u1, u2, u3,
         layout = (3,3), legend = false)
+
+       
